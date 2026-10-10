@@ -1,0 +1,72 @@
+/**
+ * Semantic typography roles. Prefer these classes over ad-hoc font-size values
+ * so headings, labels and numeric data stay consistent across the app.
+ */
+.text-display {
+  font-size: var(--font-size-display);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  font-weight: var(--weight-bold);
+}
+
+.text-h1 {
+  font-size: var(--font-size-h1);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  font-weight: var(--weight-bold);
+}
+
+.text-h2 {
+  font-size: var(--font-size-h2);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  font-weight: var(--weight-semibold);
+}
+
+.text-h3 {
+  font-size: var(--font-size-h3);
+  line-height: var(--leading-snug);
+  font-weight: var(--weight-semibold);
+}
+
+.text-body-lg {
+  font-size: var(--font-size-body-lg);
+  line-height: var(--leading-relaxed);
+}
+
+.text-body {
+  font-size: var(--font-size-body);
+  line-height: var(--leading-normal);
+}
+
+.text-small {
+  font-size: var(--font-size-small);
+  line-height: var(--leading-normal);
+}
+
+.text-caption {
+  font-size: var(--font-size-caption);
+  line-height: var(--leading-normal);
+  color: var(--color-text-muted);
+}
+
+.text-overline {
+  font-size: var(--font-size-overline);
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-muted);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-subtle {
+  color: var(--color-text-subtle);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
