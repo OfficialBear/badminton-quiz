@@ -65,10 +65,7 @@ describe('quizService', () => {
   })
 
   it('returns null when no question matches the filters', () => {
-    const attempt = createAttempt(
-      { ...DEFAULT_CONFIG, topics: ['officials'], difficulty: 'basic' },
-      QUESTION_BANK,
-    )
+    const attempt = createAttempt({ ...DEFAULT_CONFIG, questionCount: 5 }, [])
     expect(attempt).toBeNull()
   })
 })

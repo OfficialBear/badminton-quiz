@@ -109,9 +109,7 @@ export function SettingsPage() {
           </div>
           <div className="flex justify-between gap-3">
             <dt className="text-muted-foreground">{t('settings.ruleVersion')}</dt>
-            <dd className="font-medium">
-              {RULE_VERSION === 'pending' ? t('settings.ruleVersion.pending') : RULE_VERSION}
-            </dd>
+            <dd className="font-medium">{RULE_VERSION}</dd>
           </div>
         </dl>
       </Surface>
