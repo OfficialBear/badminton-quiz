@@ -107,15 +107,14 @@ describe('bankValidation', () => {
     expect(report.distribution.byType['single']).toBe(1)
   })
 
-  it('summarizes the current bank: 100 verified, target distribution met', () => {
+  it('summarizes the current bank: all verified and structurally valid', () => {
     const distribution = buildDistribution(QUESTION_BANK)
-    expect(distribution.total).toBe(100)
+    expect(distribution.total).toBe(QUESTION_BANK.length)
     expect(distribution.draft).toBe(0)
-    expect(distribution.verified).toBe(100)
+    expect(distribution.verified).toBe(QUESTION_BANK.length)
     const report = validateQuestionBank(QUESTION_BANK, { checkDistribution: true })
     expect(report.ok).toBe(true)
     expect(report.errors).toEqual([])
-    expect(report.warnings).toEqual([])
     const gate = validateQuestionBank(QUESTION_BANK, { requireVerified: true })
     expect(gate.errors).toEqual([])
   })

@@ -9,6 +9,9 @@ import { QuizPage } from '@/pages/QuizPage'
 import { ResultsPage } from '@/pages/ResultsPage'
 import { ReviewPage } from '@/pages/ReviewPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { TestIntroPage } from '@/pages/test/TestIntroPage'
+import { TestPaperPage } from '@/pages/test/TestPaperPage'
+import { TestResultsPage } from '@/pages/test/TestResultsPage'
 import { ROUTES } from './paths'
 
 /**
@@ -19,6 +22,18 @@ export const appRoutes: RouteObject[] = [
   {
     path: '/quiz/:attemptId',
     element: <QuizPage />,
+  },
+  {
+    path: '/test',
+    element: <TestIntroPage />,
+  },
+  {
+    path: '/test/paper',
+    element: <TestPaperPage />,
+  },
+  {
+    path: '/test/results',
+    element: <TestResultsPage />,
   },
   {
     path: '/',

@@ -7,6 +7,9 @@ export const ROUTES = {
   history: '/history',
   settings: '/settings',
   legacySetup: '/quiz/setup',
+  test: '/test',
+  testPaper: '/test/paper',
+  testResults: '/test/results',
 } as const
 
 export interface PracticePathParams {

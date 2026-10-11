@@ -105,6 +105,9 @@ export function HomePage() {
             <PlayIcon />
             {t('home.quickStart')}
           </Button>
+          <Button variant="secondary" size="lg" onClick={() => navigate(ROUTES.test)}>
+            {t('test.homeEntry')}
+          </Button>
         </div>
       </section>
 
