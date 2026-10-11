@@ -340,7 +340,6 @@ export function QuizPage() {
                 marker={MARKERS[optionIndex] ?? String(optionIndex + 1)}
                 checked={isChosen}
                 state={state}
-                disabled={showFeedback}
                 onSelect={() => toggleOptions(question.id, option.id, question.type)}
               >
                 {option.text[language]}

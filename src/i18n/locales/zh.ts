@@ -84,6 +84,7 @@ export const zh = {
   'setup.randomizeOptions.label': '随机选项顺序',
   'setup.timer.label': '时间限制',
   'setup.timer.enable': '开启计时',
+  'setup.timer.none': '不限时',
   'setup.start': '开始测评',
   'setup.summary.title': '本次测评配置',
   'setup.summary.mode': '模式',

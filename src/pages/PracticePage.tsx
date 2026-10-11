@@ -7,12 +7,14 @@ import { CATEGORIES } from '@/data/categories'
 import { MODES } from '@/data/modes'
 import { QUESTION_BANK } from '@/data/questionBank'
 import { ROUTES, quizPath } from '@/router/paths'
-import { DEFAULT_CONFIG, createAttempt, sampleQuestions } from '@/services/quizService'
+import { createAttempt, sampleQuestions } from '@/services/quizService'
 import { saveActiveAttempt, saveAttempt } from '@/services/storageService'
 import type { AttemptConfig } from '@/types/attempt'
 import type { CategoryId, Difficulty } from '@/types/quiz'
 
-const COUNT_VALUES = [10, 20, 30, 50] as const
+const COUNT_VALUES: (number | 'all')[] = [10, 20, 30, 50, 'all']
+const TIMER_VALUES = ['none', '10', '20', '30'] as const
+type TimerValue = (typeof TIMER_VALUES)[number]
 
 const DIFFICULTY_LABELS: Record<Difficulty | 'all', MessageKey> = {
   all: 'common.all',
@@ -34,11 +36,10 @@ export function PracticePage() {
     initialTopic ? [initialTopic as CategoryId] : [],
   )
   const [difficulty, setDifficulty] = useState<Difficulty | 'all'>('all')
-  const [count, setCount] = useState<number>(DEFAULT_CONFIG.questionCount as number)
+  const [count, setCount] = useState<number | 'all'>(20)
   const [randomizeQuestions, setRandomizeQuestions] = useState(true)
   const [randomizeOptions, setRandomizeOptions] = useState(false)
-  const [timerEnabled, setTimerEnabled] = useState(false)
-  const [timerMinutes, setTimerMinutes] = useState(20)
+  const [timerValue, setTimerValue] = useState<TimerValue>('none')
 
   const config = useMemo<AttemptConfig>(
     () => ({
@@ -48,10 +49,10 @@ export function PracticePage() {
       questionCount: count,
       randomizeQuestions,
       randomizeOptions,
-      timerEnabled: mode === 'exam' && timerEnabled,
-      timerMinutes: mode === 'exam' && timerEnabled ? timerMinutes : null,
+      timerEnabled: mode === 'exam' && timerValue !== 'none',
+      timerMinutes: mode === 'exam' && timerValue !== 'none' ? Number(timerValue) : null,
     }),
-    [mode, topics, difficulty, count, randomizeQuestions, randomizeOptions, timerEnabled, timerMinutes],
+    [mode, topics, difficulty, count, randomizeQuestions, randomizeOptions, timerValue],
   )
 
   const available = useMemo(() => sampleQuestions(config, QUESTION_BANK).length, [config])
@@ -68,6 +69,16 @@ export function PracticePage() {
     { value: 'all', label: t('topics.all') },
     ...CATEGORIES.map((category) => ({ value: category.id, label: t(category.labelKey) })),
   ]
+
+  const countOptions = COUNT_VALUES.map((value) => ({
+    value: String(value),
+    label: value === 'all' ? t('setup.count.all') : String(value),
+  }))
+
+  const timerOptions = TIMER_VALUES.map((value) => ({
+    value,
+    label: value === 'none' ? t('setup.timer.none') : `${value} ${t('common.minutes')}`,
+  }))
 
   return (
     <div className="flex flex-col gap-6">
@@ -131,9 +142,21 @@ export function PracticePage() {
             <Select
               id="practice-count"
               value={String(count)}
-              onChange={(event) => setCount(Number(event.target.value))}
-              options={COUNT_VALUES.map((value) => ({ value: String(value), label: String(value) }))}
+              onChange={(event) => {
+                const value = event.target.value
+                setCount(value === 'all' ? 'all' : Number(value))
+              }}
+              options={countOptions}
             />
+            {mode === 'exam' ? (
+              <Select
+                id="practice-timer"
+                label={t('setup.timer.label')}
+                value={timerValue}
+                onChange={(event) => setTimerValue(event.target.value as TimerValue)}
+                options={timerOptions}
+              />
+            ) : null}
             <Checkbox
               id="practice-randomize"
               label={t('setup.random.label')}
@@ -146,28 +169,6 @@ export function PracticePage() {
               checked={randomizeOptions}
               onChange={setRandomizeOptions}
             />
-            {mode === 'exam' ? (
-              <>
-                <Checkbox
-                  id="practice-timer"
-                  label={t('setup.timer.enable')}
-                  checked={timerEnabled}
-                  onChange={setTimerEnabled}
-                />
-                {timerEnabled ? (
-                  <Select
-                    id="practice-timer-minutes"
-                    label={t('setup.timer.label')}
-                    value={String(timerMinutes)}
-                    onChange={(event) => setTimerMinutes(Number(event.target.value))}
-                    options={[10, 20, 30].map((value) => ({
-                      value: String(value),
-                      label: `${value} ${t('common.minutes')}`,
-                    }))}
-                  />
-                ) : null}
-              </>
-            ) : null}
           </section>
         </div>
 
@@ -183,11 +184,21 @@ export function PracticePage() {
               </div>
               <div className="flex justify-between gap-3">
                 <dt className="text-muted-foreground">{t('setup.summary.count')}</dt>
-                <dd className="font-medium tabular-nums">{count}</dd>
+                <dd className="font-medium tabular-nums">
+                  {count === 'all' ? t('setup.count.all') : count}
+                </dd>
               </div>
               <div className="flex justify-between gap-3">
                 <dt className="text-muted-foreground">{t('setup.summary.difficulty')}</dt>
                 <dd className="font-medium">{t(DIFFICULTY_LABELS[difficulty])}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">{t('setup.summary.timer')}</dt>
+                <dd className="font-medium">
+                  {mode === 'exam' && timerValue !== 'none'
+                    ? `${timerValue} ${t('common.minutes')}`
+                    : t('setup.timer.none')}
+                </dd>
               </div>
             </dl>
             {available === 0 ? (
@@ -197,6 +208,9 @@ export function PracticePage() {
                 {t('practice.start')}
               </Button>
             )}
+            <p className="text-muted-foreground text-xs">
+              {t('setup.count.label')}: {available}
+            </p>
             <Button variant="ghost" fullWidth onClick={() => navigate(ROUTES.home)}>
               {t('common.back')}
             </Button>

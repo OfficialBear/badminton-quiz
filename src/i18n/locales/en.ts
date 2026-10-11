@@ -84,6 +84,7 @@ export const en = {
   'setup.randomizeOptions.label': 'Randomize option order',
   'setup.timer.label': 'Time limit',
   'setup.timer.enable': 'Enable timer',
+  'setup.timer.none': 'No limit',
   'setup.start': 'Start quiz',
   'setup.summary.title': "This quiz's configuration",
   'setup.summary.mode': 'Mode',

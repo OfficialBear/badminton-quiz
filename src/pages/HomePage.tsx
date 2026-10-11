@@ -5,6 +5,7 @@ import { Alert, EmptyState, SectionHeader, StatTile, Surface } from '@/component
 import { Button } from '@/components/shadcn/button'
 import { useI18n } from '@/i18n/I18nContext'
 import { MODES, modeLabelKey } from '@/data/modes'
+import { CATEGORIES } from '@/data/categories'
 import { ROUTES, practicePath, quizPath } from '@/router/paths'
 import { DEFAULT_CONFIG, createAttempt, createAttemptFromQuestions } from '@/services/quizService'
 import { QUESTION_BANK } from '@/data/questionBank'
@@ -121,9 +122,9 @@ export function HomePage() {
       ) : null}
 
       <section className="flex flex-col gap-4">
-        <SectionHeader title={t('home.moreModes')} />
-        <div className="grid gap-3 md:grid-cols-3">
-          {MODES.filter((mode) => mode.id !== 'practice').map((mode) => {
+        <SectionHeader title={t('home.pickMode')} />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {MODES.map((mode) => {
             const Icon = MODE_ICONS[mode.id] ?? PlayIcon
             return (
               <Button
@@ -148,6 +149,21 @@ export function HomePage() {
               </Button>
             )
           })}
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <SectionHeader title={t('home.topics.title')} description={t('home.topics.subtitle')} />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {CATEGORIES.map((category) => (
+            <Link
+              key={category.id}
+              to={practicePath({ topic: category.id })}
+              className="border-border bg-card hover:bg-secondary text-foreground flex min-h-11 items-center rounded-lg border px-4 font-medium no-underline hover:no-underline"
+            >
+              {t(category.labelKey)}
+            </Link>
+          ))}
         </div>
       </section>
 

@@ -17,7 +17,7 @@ import type { MessageKey } from '@/i18n'
 import { QUESTION_BANK } from '@/data/questionBank'
 import { categoryLabelKey, difficultyLabelKey, questionTypeLabelKey } from '@/data/categories'
 import { modeLabelKey } from '@/data/modes'
-import { ROUTES } from '@/router/paths'
+import { ROUTES, practicePath } from '@/router/paths'
 import { gradeFor } from '@/services/scoringService'
 import { questionsForAttempt, usesDraftQuestions } from '@/services/quizService'
 import { loadAttempts } from '@/services/storageService'
@@ -118,6 +118,9 @@ export function ResultsPage() {
           {t('results.retry')}
         </Button>
         <Button onClick={() => navigate(ROUTES.review)}>{t('results.goReview')}</Button>
+        <Button variant="secondary" onClick={() => navigate(practicePath({ mode: 'topic' }))}>
+          {t('mode.topic')}
+        </Button>
         <Button variant="ghost" onClick={() => navigate(ROUTES.home)}>
           {t('results.backHome')}
         </Button>
