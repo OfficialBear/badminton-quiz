@@ -114,4 +114,15 @@ describe('bankValidation', () => {
     const report = validateQuestionBank(QUESTION_BANK, { checkDistribution: true })
     expect(report.warnings.some((warning) => warning.code === 'total-count-mismatch')).toBe(true)
   })
+
+  it('current bank questions all have complete Chinese and English content', () => {
+    const report = validateQuestionBank(QUESTION_BANK, { checkDistribution: false })
+    const bilingualCodes = [
+      'missing-question-text',
+      'missing-explanation',
+      'missing-option-text',
+    ]
+    const missing = report.errors.filter((error) => bilingualCodes.includes(error.code))
+    expect(missing).toEqual([])
+  })
 })

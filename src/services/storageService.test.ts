@@ -51,7 +51,7 @@ describe('storageService', () => {
   it('round-trips settings', () => {
     expect(saveSettings({ language: 'en' })).toBe(true)
     expect(loadSettings().language).toBe('en')
-    expect(loadSettings().theme).toBe('system')
+    expect(loadSettings().theme).toBe('light')
   })
 
   it('persists and restores an in-progress attempt (refresh recovery)', () => {

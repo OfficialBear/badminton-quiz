@@ -145,7 +145,7 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   schemaVersion: SETTINGS_SCHEMA_VERSION,
   language: 'zh',
-  theme: 'system',
+  theme: 'light',
 }
 
 function isLanguage(value: unknown): value is Language {

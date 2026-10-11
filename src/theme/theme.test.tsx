@@ -33,7 +33,7 @@ describe('ThemeProvider', () => {
         <ThemeProbe />
       </ThemeProvider>,
     )
-    expect(screen.getByTestId('theme')).toHaveTextContent('system')
+    expect(screen.getByTestId('theme')).toHaveTextContent('light')
     expect(document.documentElement.dataset.theme).toBe('light')
   })
 

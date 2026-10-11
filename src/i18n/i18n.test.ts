@@ -27,4 +27,18 @@ describe('i18n', () => {
   it('leaves templates without placeholders unchanged when params are passed', () => {
     expect(translate('en', 'nav.home', { unused: 'x' })).toBe(en['nav.home'])
   })
+
+  it('has no empty or placeholder translation values in either language', () => {
+    const keys = Object.keys(zh) as MessageKey[]
+    for (const key of keys) {
+      expect(zh[key].trim(), `zh:${key}`).not.toBe('')
+      expect(en[key].trim(), `en:${key}`).not.toBe('')
+    }
+  })
+
+  it('translates the vast majority of keys rather than copying the Chinese text', () => {
+    const keys = Object.keys(zh) as MessageKey[]
+    const untranslated = keys.filter((key) => en[key] === zh[key])
+    expect(untranslated.length).toBeLessThan(keys.length * 0.1)
+  })
 })
