@@ -33,6 +33,8 @@ export interface Question {
   explanation: LocalizedText
   /** Official source, e.g. "BWF Laws of Badminton". */
   ruleReference: string
+  /** Clause / locatable reference inside the source, e.g. "Laws 7.1". */
+  ruleClause: string
   /** Rule document version / effective date; "pending" until verified. */
   ruleVersion: string
   reviewStatus: ReviewStatus

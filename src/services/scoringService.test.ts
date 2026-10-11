@@ -16,6 +16,7 @@ function makeQuestion(overrides: Partial<Question> = {}): Question {
     correctOptionIds: ['a'],
     explanation: { zh: 'e', en: 'e' },
     ruleReference: 'BWF',
+    ruleClause: 'pending',
     ruleVersion: 'pending',
     reviewStatus: 'draft',
     tags: [],

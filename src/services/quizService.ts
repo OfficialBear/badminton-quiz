@@ -2,7 +2,7 @@ import type { AttemptConfig, Attempt } from '../types/attempt'
 import type { Question, QuestionOption } from '../types/quiz'
 import { QUESTION_BANK, QUESTION_BANK_VERSION, RULE_VERSION } from '../data/questionBank'
 import { createId } from '../utils/id'
-import { shuffle } from '../utils/shuffle'
+import { shuffleWith, type RandomSource } from '../utils/shuffle'
 
 export const DEFAULT_CONFIG: AttemptConfig = {
   mode: 'practice',
@@ -32,14 +32,25 @@ export function availableQuestions(
     if (!isAvailable(question)) return false
     if (config.topics.length > 0 && !config.topics.includes(question.category)) return false
     if (config.difficulty !== 'all' && question.difficulty !== config.difficulty) return false
+    if (
+      config.questionTypes &&
+      config.questionTypes.length > 0 &&
+      !config.questionTypes.includes(question.type)
+    ) {
+      return false
+    }
     return true
   })
 }
 
 /** Picks unique questions; never repeats and never exceeds the available count. */
-export function sampleQuestions(config: AttemptConfig, bank: Question[] = QUESTION_BANK): Question[] {
+export function sampleQuestions(
+  config: AttemptConfig,
+  bank: Question[] = QUESTION_BANK,
+  rng: RandomSource = Math.random,
+): Question[] {
   const pool = availableQuestions(config, bank)
-  const ordered = config.randomizeQuestions ? shuffle(pool) : pool
+  const ordered = config.randomizeQuestions ? shuffleWith(pool, rng) : pool
   if (config.questionCount === 'all') return ordered
   const requested = Math.max(0, Math.floor(config.questionCount))
   return ordered.slice(0, Math.min(requested, ordered.length))
@@ -79,8 +90,12 @@ export function createAttemptFromQuestions(
   }
 }
 
-export function createAttempt(config: AttemptConfig, bank: Question[] = QUESTION_BANK): Attempt | null {
-  return createAttemptFromQuestions(config, sampleQuestions(config, bank))
+export function createAttempt(
+  config: AttemptConfig,
+  bank: Question[] = QUESTION_BANK,
+  rng: RandomSource = Math.random,
+): Attempt | null {
+  return createAttemptFromQuestions(config, sampleQuestions(config, bank, rng))
 }
 
 export function questionsForAttempt(attempt: Attempt, bank: Question[] = QUESTION_BANK): Question[] {

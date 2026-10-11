@@ -1,4 +1,4 @@
-import type { CategoryId, Difficulty } from './quiz'
+import type { CategoryId, Difficulty, QuestionType } from './quiz'
 
 export type QuizMode = 'practice' | 'exam' | 'topic' | 'wrong'
 
@@ -8,6 +8,8 @@ export interface AttemptConfig {
   mode: QuizMode
   topics: CategoryId[]
   difficulty: Difficulty | 'all'
+  /** Empty/undefined means "all question types". */
+  questionTypes?: QuestionType[]
   questionCount: number | 'all'
   randomizeQuestions: boolean
   randomizeOptions: boolean
