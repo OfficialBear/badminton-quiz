@@ -42,6 +42,12 @@ export interface Attempt {
   submittedAt: string | null
   /** Question ids selected for this attempt, in stored order. */
   questionIds: string[]
+  /** Presented order of questions (equals questionIds; explicit for clarity). */
+  questionOrder: string[]
+  /** Persisted option id order per question (empty when options are not randomized). */
+  optionOrders: Record<string, string[]>
+  /** Index of the question the user was last on. */
+  currentIndex: number
   answers: Record<string, AttemptAnswer>
   timeLimitSeconds: number | null
   /** Absolute deadline (ISO). Timer is computed from this, not from counters. */

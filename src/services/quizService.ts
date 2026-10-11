@@ -2,7 +2,7 @@ import type { AttemptConfig, Attempt } from '../types/attempt'
 import type { Question, QuestionOption } from '../types/quiz'
 import { QUESTION_BANK, QUESTION_BANK_VERSION, RULE_VERSION } from '../data/questionBank'
 import { createId } from '../utils/id'
-import { shuffleWith, type RandomSource } from '../utils/shuffle'
+import { shuffleWith, createSeededRandom, type RandomSource } from '../utils/shuffle'
 
 export const DEFAULT_CONFIG: AttemptConfig = {
   mode: 'practice',
@@ -63,16 +63,30 @@ export function createAttemptFromQuestions(
   if (questions.length === 0) return null
 
   const now = new Date()
+  const id = createId()
   const timeLimitSeconds =
     config.timerEnabled && config.timerMinutes ? config.timerMinutes * 60 : null
+  const questionIds = questions.map((question) => question.id)
+  const optionOrders: Record<string, string[]> = {}
+  if (config.randomizeOptions) {
+    for (const question of questions) {
+      optionOrders[question.id] = shuffleWith(
+        question.options.map((option) => option.id),
+        createSeededRandom(hashSeed(`${id}:${question.id}`)),
+      )
+    }
+  }
 
   return {
-    id: createId(),
+    id,
     config,
     status: 'in-progress',
     startedAt: now.toISOString(),
     submittedAt: null,
-    questionIds: questions.map((question) => question.id),
+    questionIds,
+    questionOrder: questionIds,
+    optionOrders,
+    currentIndex: 0,
     answers: {},
     timeLimitSeconds,
     deadlineAt:
@@ -105,36 +119,24 @@ export function questionsForAttempt(attempt: Attempt, bank: Question[] = QUESTIO
     .filter((question): question is Question => question !== undefined)
 }
 
-/** Stable option order for a question within an attempt (persisted at creation time). */
 export function optionOrderFor(attempt: Attempt, question: Question): QuestionOption[] {
+  const stored = attempt.optionOrders?.[question.id]
+  if (stored && stored.length > 0) {
+    const byId = new Map(question.options.map((option) => [option.id, option]))
+    const ordered = stored
+      .map((id) => byId.get(id))
+      .filter((option): option is QuestionOption => option !== undefined)
+    if (ordered.length === question.options.length) return ordered
+  }
   if (!attempt.config.randomizeOptions) return question.options
-  const seedKey = `${attempt.id}:${question.id}`
-  return shuffleWithSeed(question.options, seedKey)
+  return shuffleWith(question.options, createSeededRandom(hashSeed(`${attempt.id}:${question.id}`)))
 }
 
-/** Deterministic shuffle so the same attempt restores the same option order. */
-function shuffleWithSeed<T>(items: readonly T[], seed: string): T[] {
+function hashSeed(value: string): number {
   let hash = 2166136261
-  for (let i = 0; i < seed.length; i += 1) {
-    hash ^= seed.charCodeAt(i)
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i)
     hash = Math.imul(hash, 16777619)
   }
-  const random = () => {
-    hash += 0x6d2b79f5
-    let t = hash
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-  const result = [...items]
-  for (let i = result.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(random() * (i + 1))
-    const a = result[i]
-    const b = result[j]
-    if (a !== undefined && b !== undefined) {
-      result[i] = b
-      result[j] = a
-    }
-  }
-  return result
+  return hash >>> 0
 }

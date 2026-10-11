@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { CheckIcon, RefreshIcon, TargetIcon, TrashIcon } from '@/components/icons'
 import { Badge, Button, Checkbox, Dialog, EmptyState, Select, Surface } from '@/components/ui'
 import { useI18n } from '@/i18n/I18nContext'
-import { QUESTION_BANK, QUESTION_BANK_VERSION, RULE_VERSION } from '@/data/questionBank'
+import { QUESTION_BANK } from '@/data/questionBank'
 import { CATEGORIES, difficultyLabelKey } from '@/data/categories'
 import { quizPath } from '@/router/paths'
 import { setMastered } from '@/services/reviewService'
-import { createId } from '@/utils/id'
+import { DEFAULT_CONFIG, createAttemptFromQuestions } from '@/services/quizService'
 import { loadReview, saveActiveAttempt, saveAttempt, saveReview } from '@/services/storageService'
-import type { Attempt } from '@/types/attempt'
 import type { CategoryId, Difficulty } from '@/types/quiz'
 import { cn } from '@/lib/utils'
 
@@ -50,38 +49,11 @@ export function ReviewPage() {
     const questions = unmastered
       .map((item) => byId.get(item.questionId))
       .filter((question): question is NonNullable<typeof question> => question !== undefined)
-    if (questions.length === 0) return
-    const now = new Date()
-    const attempt: Attempt = {
-      id: createId(),
-      config: {
-        mode: 'wrong',
-        topics: [],
-        difficulty: 'all',
-        questionCount: questions.length,
-        randomizeQuestions: false,
-        randomizeOptions: false,
-        timerEnabled: false,
-        timerMinutes: null,
-      },
-      status: 'in-progress',
-      startedAt: now.toISOString(),
-      submittedAt: null,
-      questionIds: questions.map((question) => question.id),
-      answers: {},
-      timeLimitSeconds: null,
-      deadlineAt: null,
-      elapsedSeconds: null,
-      totalQuestions: questions.length,
-      correctCount: null,
-      wrongCount: null,
-      unansweredCount: null,
-      score: null,
-      scorePercentage: null,
-      categoryStats: [],
-      questionBankVersion: QUESTION_BANK_VERSION,
-      ruleVersion: RULE_VERSION,
-    }
+    const attempt = createAttemptFromQuestions(
+      { ...DEFAULT_CONFIG, mode: 'wrong', questionCount: questions.length, randomizeQuestions: false },
+      questions,
+    )
+    if (!attempt) return
     saveAttempt(attempt)
     saveActiveAttempt(attempt)
     navigate(quizPath(attempt.id))

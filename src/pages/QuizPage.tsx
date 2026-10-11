@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   ChevronLeftIcon,
@@ -40,6 +40,7 @@ import {
 import type { Attempt, AttemptAnswer } from '@/types/attempt'
 import type { QuestionType } from '@/types/quiz'
 import { cn } from '@/lib/utils'
+import { computeRemainingSeconds } from '@/utils/time'
 
 const MARKERS = 'ABCDEFGH'
 
@@ -61,16 +62,14 @@ export function QuizPage() {
     if (active && active.id === attemptId) return active
     return loadAttempts().find((item) => item.id === attemptId) ?? null
   })
-  const [index, setIndex] = useState(0)
+  const [index, setIndex] = useState(() => attempt?.currentIndex ?? 0)
   const [revealed, setRevealed] = useState<Record<string, boolean>>({})
   const [navigatorOpen, setNavigatorOpen] = useState(false)
   const [submitOpen, setSubmitOpen] = useState(false)
-  const [remaining, setRemaining] = useState<number | null>(() => {
-    const deadline = attempt?.deadlineAt
-    return deadline
-      ? Math.max(0, Math.round((new Date(deadline).getTime() - Date.now()) / 1000))
-      : null
-  })
+  const submittedRef = useRef(false)
+  const [remaining, setRemaining] = useState<number | null>(() =>
+    computeRemainingSeconds(attempt?.deadlineAt ?? null, Date.now()),
+  )
 
   const questions = useMemo(
     () => (attempt ? questionsForAttempt(attempt, QUESTION_BANK) : []),
@@ -96,7 +95,8 @@ export function QuizPage() {
 
   const submitAttempt = useCallback(
     (auto = false) => {
-      if (!attempt) return
+      if (!attempt || submittedRef.current) return
+      submittedRef.current = true
       const summary = computeScore(questions, attempt.answers)
       const submitted: Attempt = {
         ...attempt,
@@ -118,14 +118,13 @@ export function QuizPage() {
     [attempt, questions, navigate],
   )
 
-  // Absolute-deadline timer (never relies on interval counting).
-  const deadlineMs = attempt?.deadlineAt ? new Date(attempt.deadlineAt).getTime() : null
+  const deadlineAt = attempt?.deadlineAt ?? null
   useEffect(() => {
-    if (deadlineMs === null) return
-    const tick = () => setRemaining(Math.max(0, Math.round((deadlineMs - Date.now()) / 1000)))
+    if (!deadlineAt) return
+    const tick = () => setRemaining(computeRemainingSeconds(deadlineAt, Date.now()))
     const timer = window.setInterval(tick, 1000)
     return () => window.clearInterval(timer)
-  }, [deadlineMs])
+  }, [deadlineAt])
 
   useEffect(() => {
     if (attempt && attempt.status === 'in-progress' && remaining === 0) {
@@ -151,8 +150,10 @@ export function QuizPage() {
   const markedCount = questions.filter((item) => answerOf(item.id)?.markedForReview).length
 
   const goTo = (nextIndex: number) => {
-    setIndex(Math.min(Math.max(nextIndex, 0), questions.length - 1))
+    const clamped = Math.min(Math.max(nextIndex, 0), questions.length - 1)
+    setIndex(clamped)
     setNavigatorOpen(false)
+    if (attempt.status === 'in-progress') persist({ ...attempt, currentIndex: clamped })
   }
 
   const toggleOptions = (questionId: string, optionId: string, type: QuestionType) => {
